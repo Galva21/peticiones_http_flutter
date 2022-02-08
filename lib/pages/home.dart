@@ -9,48 +9,81 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<ActividadModel> _actividadModel = [];
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.grey[900],
-          title: Text('Peticiones HTTP'),
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+          title: Text(
+            'Peticiones HTTP',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+            ),
+          ),
           actions: [
             IconButton(
               onPressed: () async {
-                _actividadModel.add(await UserServices().getIdeas());
+                loading = true;
+                setState(() {});
+                _actividadModel.insert(0, await UserServices().getIdeas());
+                loading = false;
                 setState(() {});
               },
-              splashColor: Colors.green,
+              splashColor: Colors.green[200],
               icon: Icon(
                 Icons.lightbulb,
-                color: Colors.yellow,
+                color: Colors.grey[700],
               ),
             ),
           ],
         ),
-        body: ListView(
-          children: [
-            for (var item in _actividadModel)
-              ExpansionTile(
-                title: Text(item.activity!),
-                subtitle: Text(item.type!),
+        body: _actividadModel.isEmpty
+            ? Center(child: Text('No hay ideas'))
+            : ListView(
                 children: [
-                  ListTile(
-                    title: Text(item.participants.toString()),
-                    leading: Icon(Icons.people),
-                  ),
-                  ListTile(
-                    title: Text(item.price.toString()),
-                    leading: Icon(Icons.money),
-                  ),
-                  ListTile(
-                    title: Text(item.accessibility.toString()),
-                    leading: Icon(Icons.accessibility),
-                  ),
+                  if (loading)
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  for (var item in _actividadModel)
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: ExpansionTile(
+                        title: Text(item.activity!),
+                        subtitle: Text(item.type!),
+                        children: [
+                          ListTile(
+                            title: Text(item.participants.toString()),
+                            leading: Icon(Icons.people),
+                          ),
+                          ListTile(
+                            title: Text(item.price.toString()),
+                            leading: Icon(Icons.money),
+                          ),
+                          ListTile(
+                            title: Text(item.accessibility.toString()),
+                            leading: Icon(Icons.accessibility),
+                          ),
+                        ],
+                      ),
+                    )
                 ],
-              )
-          ],
-        ));
+              ));
   }
 }
